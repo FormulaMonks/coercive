@@ -1,0 +1,196 @@
+require "minitest/autorun"
+
+require_relative "../lib/coercive"
+require_relative "../lib/coercive/uri"
+
+describe "Coercive::URI" do
+  def assert_coercion_error(errors)
+    yield
+    assert false, "should have raised a Coercive::Error"
+  rescue Coercive::Error => e
+    assert_equal errors, e.errors
+  end
+
+  setup do
+    @coercion = Module.new do
+      extend Coercive
+
+      attribute :any,   uri(string),                   optional
+      attribute :min,   uri(string(min: 13)),          optional
+      attribute :max,   uri(string(max: 17)),          optional
+      attribute :sized, uri(string(min: 13, max: 17)), optional
+
+      attribute :schema,
+        uri(string(min: 1, max: 255), schema_fn: member(%w{http})),
+        optional
+
+      attribute :require_path,
+        uri(string(min: 1, max: 255), require_path: true),
+        optional
+
+      attribute :require_port,
+        uri(string(min: 1, max: 255), require_port: true),
+        optional
+
+      attribute :require_user,
+        uri(string(min: 1, max: 255), require_user: true),
+        optional
+
+      attribute :require_password,
+        uri(string(min: 1, max: 255), require_password: true),
+        optional
+    end
+  end
+
+  test "coerces a valid string to a URI" do
+    attributes = {
+      "any" => "http://user:pass@www.example.com:1234/path"
+    }
+
+    assert_equal attributes, @coercion.call(attributes)
+  end
+
+  test "errors if input is an invalid URI" do
+    attributes = { "any" => "%" }
+
+    expected_errors = { "any" => "not_valid" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if the input is longer than the declared maximum size" do
+    attributes = {
+      "min"   => "http://foo.com",
+      "max"   => "http://long.url.com",
+      "sized" => "http://way.too.long.com",
+    }
+
+    expected_errors = { "max" => "too_long", "sized" => "too_long" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if the input is shorter than the declared minimum size" do
+    attributes = {
+      "min"   => "http://a.com",
+      "max"   => "http://bar.com",
+      "sized" => "http://c.com"
+    }
+
+    expected_errors = { "min" => "too_short", "sized" => "too_short" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if the URI is an empty string" do
+    attributes      = { "schema" => "" }
+    expected_errors = { "schema" => "is_empty" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if no host" do
+    attributes = { "any" => "http://" }
+
+    expected_errors = { "any" => "no_host" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if schema is not supported" do
+    attributes = { "schema" => "foo://example.com" }
+
+    expected_errors = { "schema" => "unsupported_schema" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors if required elements are not provided" do
+    attributes = {
+      "require_path"     => "foo://example.com",
+      "require_port"     => "foo://example.com",
+      "require_user"     => "foo://example.com",
+      "require_password" => "foo://example.com",
+    }
+
+    expected_errors = {
+      "require_path"     => "no_path",
+      "require_port"     => "no_port",
+      "require_user"     => "no_user",
+      "require_password" => "no_password",
+    }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  Coercive::URI::PRIVATE_IP_RANGES.each do |range|
+    range = range.to_range
+    first = range.first
+    last  = range.last
+    first = first.ipv6? ? "[#{first}]" : first.to_s
+    last  = last.ipv6?  ? "[#{last}]"  : last.to_s
+
+    test "errors when the URI host is an IP in the range #{first}..#{last}" do
+      attributes_first = { "schema" => "http://#{first}/path" }
+      attributes_last  = { "schema" => "http://#{last}/path" }
+      expected_errors  = { "schema" => "not_resolvable" }
+
+      assert_coercion_error(expected_errors) { @coercion.call(attributes_first) }
+      assert_coercion_error(expected_errors) { @coercion.call(attributes_last) }
+    end
+  end
+
+  test "errors when the URI host is not resolvable" do
+    attributes = {
+      "schema" => "http://bogus-host-that-cant-possibly-exist-here/path"
+    }
+
+    expected_errors = { "schema" => "not_resolvable" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors when the URI host resolves to an IP in a private range" do
+    attributes = { "schema" => "http://localhost/path" }
+
+    expected_errors = { "schema" => "not_resolvable" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "allows a URI host to be IP that isn't in a private range" do
+    attributes = { "schema" => "http://8.8.8.8/path" }
+
+    assert_equal attributes, @coercion.call(attributes)
+  end
+
+  test "allows a URI host that resolves to an IP not in a private range" do
+    attributes = { "schema" => "http://www.example.com/path" }
+
+    assert_equal attributes, @coercion.call(attributes)
+  end
+
+  test "allows a URI with no explicit path component" do
+    attributes = { "schema" => "http://www.example.com" }
+
+    assert_equal attributes, @coercion.call(attributes)
+  end
+
+  test "errors for a string that does not pass URI.parse" do
+    attributes = { "schema" => "\\" }
+    expected_errors = { "schema" => "not_valid" }
+
+    assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+  end
+
+  test "errors for a URL that passes URI.parse, but is ill-formed" do
+    attributes = { "schema" => "http:example.com/path" }
+
+    begin
+      @coercion.call(attributes)
+      assert false, "should have raised a Coercive::Error"
+    rescue Coercive::Error => e
+      assert !e.errors["schema"].empty?, "should have a schema error"
+    end
+  end
+end

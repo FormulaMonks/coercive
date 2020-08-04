@@ -1,2 +1,4 @@
-# coercion
-Ruby library to validate and coerce user input
+# coercive
+
+`Coercive` is a Ruby library to validate and coerce user input.
+
