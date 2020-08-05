@@ -113,7 +113,7 @@ describe "Coercive" do
       fixnum     = 2
       rational   = 2 ** -2
       bignum     = 2 ** 64
-      bigdecimal = BigDecimal.new("0.1")
+      bigdecimal = BigDecimal("0.1")
 
       [fixnum, rational, bignum, bigdecimal].each do |value|
         attributes = { "foo" => value }
