@@ -3,14 +3,10 @@ require "uri"
 
 module Coercive
   module URI
-    # Setting this `true` allows outbound connections to private IP addresses,
-    # bypassing the security check that the IP address is public. This is designed
-    # to be used in devlopment so that the tests can connect to local services.
-    #
-    # This SHOULD NOT be set in PRODUCTION.
-    ALLOW_PRIVATE_IP_CONNECTIONS =
-      ENV.fetch("ALLOW_PRIVATE_IP_CONNECTIONS", "").downcase == "true"
-
+    # The IP ranges below are considered private and by default not permitted by the `uri`
+    # coercion function. To allow connecting to local services (in development, for example)
+    # users can set the `allow_private_ip` option, which ignores if the URI resolves to a public
+    # address or not.
     PRIVATE_IP_RANGES = [
       IPAddr.new("0.0.0.0/8"),       # Broadcasting to the current network. RFC 1700.
       IPAddr.new("10.0.0.0/8"),      # Local private network. RFC 1918.
@@ -38,7 +34,8 @@ module Coercive
     # require_user     - set true to make the URI user a required element
     # require_password - set true to make the URI password a required element
     def self.coerce_fn(string_coerce_fn, schema_fn: nil, require_path: false,
-            require_port: false, require_user: false, require_password: false)
+            require_port: false, require_user: false, require_password: false,
+            allow_private_ip: false)
       ->(input) do
         uri = begin
           ::URI.parse(string_coerce_fn.call(input))
@@ -47,7 +44,7 @@ module Coercive
         end
 
         fail Coercive::Error.new("no_host") unless uri.host
-        fail Coercive::Error.new("not_resolvable") unless resolvable_public_ip?(uri) || ALLOW_PRIVATE_IP_CONNECTIONS
+        fail Coercive::Error.new("not_resolvable") unless allow_private_ip || resolvable_public_ip?(uri)
         fail Coercive::Error.new("no_path") if require_path && uri.path.empty?
         fail Coercive::Error.new("no_port") if require_port && !uri.port
         fail Coercive::Error.new("no_user") if require_user && !uri.user

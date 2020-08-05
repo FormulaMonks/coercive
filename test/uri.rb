@@ -39,6 +39,10 @@ describe "Coercive::URI" do
       attribute :require_password,
         uri(string(min: 1, max: 255), require_password: true),
         optional
+
+      attribute :allow_private_ip,
+        uri(string(min: 1, max: 255), allow_private_ip: true),
+        optional
     end
   end
 
@@ -137,6 +141,14 @@ describe "Coercive::URI" do
 
       assert_coercion_error(expected_errors) { @coercion.call(attributes_first) }
       assert_coercion_error(expected_errors) { @coercion.call(attributes_last) }
+    end
+
+    it "allows overriding private IP address checks" do
+      attributes_first = { "allow_private_ip" => "http://#{first}/path" }
+      attributes_last  = { "allow_private_ip" => "http://#{last}/path" }
+
+      assert_equal attributes_first, @coercion.call(attributes_first)
+      assert_equal attributes_last,  @coercion.call(attributes_last)
     end
   end
 
