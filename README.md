@@ -1,4 +1,4 @@
-# coercive
+# Coercive
 
 # Install
 
@@ -194,7 +194,7 @@ CoerceFoo.call("foo" => [BasicObject.new])
 
 ### `hash`
 
-`hash` coercion let's you manipulate the key and values, similarly to how `array` does
+`hash` coercion let's you manipulate the key and values, similarly to how `array` does.
 
 ```ruby
 module CoerceFoo
@@ -209,3 +209,52 @@ CoerceFoo.call("foo" => {"bar" => "0.1"})
 CoerceFoo.call("foo" => {"barrrr" => "0.1"})
 # => Coercive::Error: {"foo"=>{"barrrr"=>"too_long"}}
 ```
+
+### `uri`
+
+The `uri` coercion function really showcases how it's very easy to build custom logic to validate and coerce any kind of input. `uri` is meant to verify IP and URLs and has a variety of options
+
+```ruby
+module CoerceFoo
+  extend Coercive
+
+  attribute :foo, uri(string), optional
+end
+
+CoerceFoo.call("foo" => "http://github.com")
+# => {"foo"=>"http://github.com"}
+
+CoerceFoo.call("foo" => "not a url")
+# => Coercive::Error: {"foo"=>"not_valid"}
+```
+
+#### `schema_fn`
+
+This option allows you to compose additional coercion functions to verify the schema.
+
+```ruby
+module CoerceFoo
+  extend Coercive
+
+  attribute :foo, uri(string, schema_fn: member(%w{http https})), optional
+end
+
+CoerceFoo.call("foo" => "https://github.com")
+# => {"foo"=>"https://github.com"}
+
+CoerceFoo.call("foo" => "ftp://github.com")
+# => Coercive::Error: {"foo"=>"unsupported_schema"}
+```
+
+#### Requiring URI elements
+
+There's a number of boolean options to enforce the presence of parts of a URI to be present. By default they're all false.
+
+* `require_path`: for example, `"https://github.com/Theorem"`
+* `require_port`: for example, `"https://github.com:433"`
+* `require_user`: for example, `"https://user@github.com"`
+* `require_password`: for example, `"https://:password@github.com"`
+
+#### Verifying resolvable addresses
+
+By default `uri` will make sure that the URI's host is a resolvable public address, meaning that private IPs will fail validation. You can override this behavior with the `allow_public_ip: true` option.
