@@ -1,7 +1,7 @@
 require "ipaddr"
 require "uri"
 
-module Coercion
+module Coercive
   module URI
     # Setting this `true` allows outbound connections to private IP addresses,
     # bypassing the security check that the IP address is public. This is designed
@@ -43,21 +43,21 @@ module Coercion
         uri = begin
           ::URI.parse(string_coerce_fn.call(input))
         rescue ::URI::InvalidURIError
-          fail Coercion::Error.new("not_valid")
+          fail Coercive::Error.new("not_valid")
         end
 
-        fail Coercion::Error.new("no_host") unless uri.host
-        fail Coercion::Error.new("not_resolvable") unless resolvable_public_ip?(uri) || ALLOW_PRIVATE_IP_CONNECTIONS
-        fail Coercion::Error.new("no_path") if require_path && uri.path.empty?
-        fail Coercion::Error.new("no_port") if require_port && !uri.port
-        fail Coercion::Error.new("no_user") if require_user && !uri.user
-        fail Coercion::Error.new("no_password") if require_password && !uri.password
+        fail Coercive::Error.new("no_host") unless uri.host
+        fail Coercive::Error.new("not_resolvable") unless resolvable_public_ip?(uri) || ALLOW_PRIVATE_IP_CONNECTIONS
+        fail Coercive::Error.new("no_path") if require_path && uri.path.empty?
+        fail Coercive::Error.new("no_port") if require_port && !uri.port
+        fail Coercive::Error.new("no_user") if require_user && !uri.user
+        fail Coercive::Error.new("no_password") if require_password && !uri.password
 
         if schema_fn
           begin
             schema_fn.call(uri.scheme)
-          rescue Coercion::Error
-            fail Coercion::Error.new("unsupported_schema")
+          rescue Coercive::Error
+            fail Coercive::Error.new("unsupported_schema")
           end
         end
 
