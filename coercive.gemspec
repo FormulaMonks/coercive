@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "coercive"
-  s.version = "1.0.0"
+  s.version = "1.0.1"
   s.summary = "Coercive is a library to validate and coerce user input"
   s.description = s.summary
   s.authors = ["Joe McIlvain", "Lucas Tolchinsky"]
