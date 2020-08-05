@@ -257,4 +257,4 @@ There's a number of boolean options to enforce the presence of parts of a URI to
 
 #### Verifying resolvable addresses
 
-By default `uri` will make sure that the URI's host is a resolvable public address, meaning that private IPs will fail validation. You can override this behavior with the `allow_public_ip: true` option.
+By default `uri` will make sure that the URI's host is a resolvable public address, meaning that private IPs will fail validation. You can override this behavior with the `allow_private_ip: true` option.
