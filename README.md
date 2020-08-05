@@ -212,7 +212,7 @@ CoerceFoo.call("foo" => {"barrrr" => "0.1"})
 
 ### `uri`
 
-The `uri` coercion function really showcases how it's very easy to build custom logic to validate and coerce any kind of input. `uri` is meant to verify IP and URLs and has a variety of options
+The `uri` coercion function really showcases how it's very easy to build custom logic to validate and coerce any kind of input. `uri` is meant to verify IP and URLs and has a variety of options.
 
 ```ruby
 module CoerceFoo
@@ -228,9 +228,9 @@ CoerceFoo.call("foo" => "not a url")
 # => Coercive::Error: {"foo"=>"not_valid"}
 ```
 
-#### `schema_fn`
+#### Requiring a specific URI schema
 
-This option allows you to compose additional coercion functions to verify the schema.
+The `schema_fn` option allows you to compose additional coercion functions to verify the schema.
 
 ```ruby
 module CoerceFoo
