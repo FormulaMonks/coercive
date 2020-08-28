@@ -207,6 +207,20 @@ module Coercive
     end
   end
 
+  # Public DSL: Return a coercion function to coerce ISO 8601 input into a DateTime.
+  # Used when declaring an attribute. See documentation for attr_coerce_fns.
+  def datetime
+    ->(input) do
+      input = begin
+                DateTime.iso8601(input)
+              rescue ArgumentError
+                fail Coercive::Error.new("not_valid")
+              end
+
+      input
+    end
+  end
+
   # Public DSL: Return a coercion function to coerce input to an Array.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
   #

@@ -225,6 +225,40 @@ describe "Coercive" do
     end
   end
 
+  describe "datetime" do
+    before do
+      @coercion = Module.new do
+        extend Coercive
+
+        attribute :datetime, datetime, required
+      end
+    end
+
+    it "coerces a string into a DateTime object" do
+      attributes = { "datetime" => "1988-05-18T21:00:00Z" }
+
+      expected = { "datetime" => DateTime.new(1988, 5, 18, 21, 00, 00) }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "honors the timezone" do
+      attributes = { "datetime" => "1988-05-18T21:00:00-0300" }
+
+      expected = { "datetime" => DateTime.new(1988, 5, 18, 21, 00, 00, "-03:00") }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "errors if the input isn't ISO 8601 format" do
+      attributes = { "datetime" => "18th May 1988" }
+
+      expected_errors = { "datetime" => "not_valid" }
+
+      assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+    end
+  end
+
   describe "array" do
     before do
       @coercion = Module.new do
