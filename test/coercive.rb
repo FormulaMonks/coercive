@@ -199,6 +199,32 @@ describe "Coercive" do
     end
   end
 
+  describe "date" do
+    before do
+      @coercion = Module.new do
+        extend Coercive
+
+        attribute :date, date, required
+      end
+    end
+
+    it "coerces a string into a Date object" do
+      attributes = { "date" => "1988-05-18" }
+
+      expected = { "date" => Date.new(1988, 5, 18) }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "errors if the input isn't ISO 8601 format" do
+      attributes = { "date" => "18th May 1988" }
+
+      expected_errors = { "date" => "not_valid" }
+
+      assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+    end
+  end
+
   describe "array" do
     before do
       @coercion = Module.new do

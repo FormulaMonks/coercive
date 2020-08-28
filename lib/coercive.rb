@@ -1,3 +1,4 @@
+require "date"
 require_relative "coercive/uri"
 
 # Public: The Coercive module implements a succinct DSL for declaring callable
@@ -187,6 +188,20 @@ module Coercive
       if pattern && !pattern.match(input)
         fail Coercive::Error.new("not_valid")
       end
+
+      input
+    end
+  end
+
+  # Public DSL: Return a coercion function to coerce ISO 8601 input into a Date.
+  # Used when declaring an attribute. See documentation for attr_coerce_fns.
+  def date
+    ->(input) do
+      input = begin
+                Date.iso8601(input)
+              rescue ArgumentError
+                fail Coercive::Error.new("not_valid")
+              end
 
       input
     end
