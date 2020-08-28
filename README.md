@@ -128,6 +128,26 @@ CoerceFoo.call("foo" => "DEADBEEF")
 # => {"foo"=>"DEADBEEF"}
 ```
 
+### `date` and `datetime`
+
+The `date` and `datetime` coercion functions will receive an ISO 8601 string and give you `Date` and `DateTime` objects, respectively.
+
+```ruby
+module CoerceFoo
+  extend Coercive
+
+  attribute :date_foo,     date,     optional
+  attribute :datetime_foo, datetime, optional
+end
+
+CoerceFoo.call("date_foo" => "1988-05-18", "datetime_foo" => "1988-05-18T21:00:00Z")
+# => {"date_foo"=>#<Date: 1988-05-18 ((2447300j,0s,0n),+0s,2299161j)>,
+# "datetime_foo"=>#<DateTime: 1988-05-18T21:00:00+00:00 ((2447300j,75600s,0n),+0s,2299161j)>}
+
+CoerceFoo.call("date_foo" => "18th May 1988")
+# => Coercive::Error: {"date_foo"=>"not_valid"}
+```
+
 ### `any`
 
 The `any` coercion function lets anything pass through. It's commonly used with the `optional` fetch function when an attribute may or many not be a part of the input.
