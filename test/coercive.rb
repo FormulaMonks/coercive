@@ -204,11 +204,12 @@ describe "Coercive" do
       @coercion = Module.new do
         extend Coercive
 
-        attribute :date, date, required
+        attribute :date,          date,                     optional
+        attribute :american_date, date(format: "%m-%d-%Y"), optional
       end
     end
 
-    it "coerces a string into a Date object" do
+    it "coerces a string into a Date object with ISO 8601 format by default" do
       attributes = { "date" => "1988-05-18" }
 
       expected = { "date" => Date.new(1988, 5, 18) }
@@ -216,8 +217,16 @@ describe "Coercive" do
       assert_equal expected, @coercion.call(attributes)
     end
 
-    it "errors if the input isn't ISO 8601 format" do
-      attributes = { "date" => "18th May 1988" }
+    it "supports a custom date format" do
+      attributes = { "american_date" => "05-18-1988" }
+
+      expected = { "american_date" => Date.new(1988, 5, 18) }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "errors if the input doesn't parse" do
+      attributes = { "date" => "12-31-1990" }
 
       expected_errors = { "date" => "not_valid" }
 
@@ -230,11 +239,12 @@ describe "Coercive" do
       @coercion = Module.new do
         extend Coercive
 
-        attribute :datetime, datetime, required
+        attribute :datetime,      datetime,                                 optional
+        attribute :american_date, datetime(format: "%m-%d-%Y %I:%M:%S %p"), optional
       end
     end
 
-    it "coerces a string into a DateTime object" do
+    it "coerces a string into a DateTime object with ISO 8601 format by default" do
       attributes = { "datetime" => "1988-05-18T21:00:00Z" }
 
       expected = { "datetime" => DateTime.new(1988, 5, 18, 21, 00, 00) }
@@ -250,8 +260,16 @@ describe "Coercive" do
       assert_equal expected, @coercion.call(attributes)
     end
 
-    it "errors if the input isn't ISO 8601 format" do
-      attributes = { "datetime" => "18th May 1988" }
+    it "supports a custom date format" do
+      attributes = { "american_date" => "05-18-1988 09:00:00 PM" }
+
+      expected = { "american_date" => DateTime.new(1988, 5, 18, 21, 00, 00) }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "errors if the input doesn't parse" do
+      attributes = { "datetime" => "12-31-1990T21:00:00Z" }
 
       expected_errors = { "datetime" => "not_valid" }
 
