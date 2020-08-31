@@ -171,6 +171,24 @@ CoerceFoo.call("foo" => 4)
 # => Coercive::Error: {"foo"=>"not_valid"}
 ```
 
+### `integer`
+
+`integer` expects an integer value.
+
+```ruby
+module CoerceFoo
+  extend Coercive
+
+  attribute :foo, integer, optional
+end
+
+CoerceFoo.call("foo" => "1")
+# => {"foo"=>1}
+
+CoerceFoo.call("foo" => "bar")
+# => Coercive::Error: {"foo"=>"not_valid"}
+```
+
 ### `float`
 
 `float` expects, well, a float value.

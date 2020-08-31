@@ -150,6 +150,18 @@ module Coercive
     end
   end
 
+  # Public DSL: Return a coerce function to coerce input to an Integer.
+  # Used when declaring an attribute. See documentation for attr_coerce_fns.
+  def integer
+    ->(input) do
+      begin
+        Integer(input)
+      rescue TypeError, ArgumentError
+        fail Coercive::Error.new("not_numeric")
+      end
+    end
+  end
+
   # Public DSL: Return a coerce function to coerce input to a Float.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
   def float
