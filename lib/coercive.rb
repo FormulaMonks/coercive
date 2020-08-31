@@ -193,12 +193,19 @@ module Coercive
     end
   end
 
-  # Public DSL: Return a coercion function to coerce ISO 8601 input into a Date.
+  # Public DSL: Return a coercion function to coerce input into a Date.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
-  def date
+  #
+  # format - String following Ruby's `strftime` format to change the parsing behavior. When empty
+  #          it will expect the String to be ISO 8601 compatible.
+  def date(format: nil)
     ->(input) do
       input = begin
-                Date.iso8601(input)
+                if format
+                  Date.strptime(input, format)
+                else
+                  Date.iso8601(input)
+                end
               rescue ArgumentError
                 fail Coercive::Error.new("not_valid")
               end
@@ -207,12 +214,19 @@ module Coercive
     end
   end
 
-  # Public DSL: Return a coercion function to coerce ISO 8601 input into a DateTime.
+  # Public DSL: Return a coercion function to coerce input into a DateTime.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
-  def datetime
+  #
+  # format - String following Ruby's `strftime` format to change the parsing behavior. When empty
+  #          it will expect the String to be ISO 8601 compatible.
+  def datetime(format: nil)
     ->(input) do
       input = begin
-                DateTime.iso8601(input)
+                if format
+                  DateTime.strptime(input, format)
+                else
+                  DateTime.iso8601(input)
+                end
               rescue ArgumentError
                 fail Coercive::Error.new("not_valid")
               end

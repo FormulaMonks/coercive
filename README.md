@@ -130,19 +130,23 @@ CoerceFoo.call("foo" => "DEADBEEF")
 
 ### `date` and `datetime`
 
-The `date` and `datetime` coercion functions will receive an ISO 8601 string and give you `Date` and `DateTime` objects, respectively.
+The `date` and `datetime` coercion functions will receive a `String` and give you `Date` and `DateTime` objects, respectively.
+
+By default they expect an ISO 8601 string, but they provide a `format` option in case you need to parse something different, following the `strftime` format.
 
 ```ruby
 module CoerceFoo
   extend Coercive
 
-  attribute :date_foo,     date,     optional
-  attribute :datetime_foo, datetime, optional
+  attribute :date_foo,      date,                     optional
+  attribute :american_date, date(format: "%m-%d-%Y"), optional
+  attribute :datetime_foo,  datetime,                 optional
 end
 
-CoerceFoo.call("date_foo" => "1988-05-18", "datetime_foo" => "1988-05-18T21:00:00Z")
+CoerceFoo.call("date_foo" => "1988-05-18", "datetime_foo" => "1988-05-18T21:00:00Z", "american_date" => "05-18-1988")
 # => {"date_foo"=>#<Date: 1988-05-18 ((2447300j,0s,0n),+0s,2299161j)>,
-# "datetime_foo"=>#<DateTime: 1988-05-18T21:00:00+00:00 ((2447300j,75600s,0n),+0s,2299161j)>}
+#  "american_date"=>#<Date: 1988-05-18 ((2447300j,0s,0n),+0s,2299161j)>,
+#  "datetime_foo"=>#<DateTime: 1988-05-18T21:00:00+00:00 ((2447300j,75600s,0n),+0s,2299161j)>}
 
 CoerceFoo.call("date_foo" => "18th May 1988")
 # => Coercive::Error: {"date_foo"=>"not_valid"}
