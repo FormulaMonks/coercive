@@ -187,6 +187,12 @@ CoerceFoo.call("foo" => "1")
 
 CoerceFoo.call("foo" => "bar")
 # => Coercive::Error: {"foo"=>"not_valid"}
+
+CoerceFoo.call("foo" => "1.5")
+# => Coercive::Error: {"foo"=>"not_numeric"}
+
+CoerceFoo.call("foo" => 1.5)
+# => Coercive::Error: {"foo"=>"float_not_permitted"}
 ```
 
 ### `float`
