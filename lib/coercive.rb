@@ -154,6 +154,8 @@ module Coercive
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
   def integer
     ->(input) do
+      fail Coercive::Error.new("float_not_permitted") if input.is_a?(Float)
+
       begin
         Integer(input)
       rescue TypeError, ArgumentError
