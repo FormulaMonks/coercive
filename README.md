@@ -202,19 +202,26 @@ CoerceFoo.call("foo_bounds" => 11)
 # => Coercive::Error: {"foo_bounds"=>"too_high"}
 ```
 
-### `float`
+### `float(min:, max:)`
 
-`float` expects, well, a float value.
+`float` expects, well, a float value. It supports optional `min` and `max` options to check if the user input is within certain bounds.
 
 ```ruby
 module CoerceFoo
   extend Coercive
 
-  attribute :foo, float, optional
+  attribute :foo,        float,                     optional
+  attribute :foo_bounds, float(min: 1.0, max: 5.5), optional
 end
 
 CoerceFoo.call("foo" => "bar")
 # => Coercive::Error: {"foo"=>"not_valid"}
+
+CoerceFoo.call("foo" => "0.5")
+# => Coercive::Error: {"foo"=>"too_low"}
+
+CoerceFoo.call("foo" => 6.5)
+# => Coercive::Error: {"foo"=>"too_high"}
 
 CoerceFoo.call("foo" => "0.1")
 # => {"foo"=>0.1}
