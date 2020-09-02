@@ -171,15 +171,16 @@ CoerceFoo.call("foo" => 4)
 # => Coercive::Error: {"foo"=>"not_valid"}
 ```
 
-### `integer`
+### `integer(min:, max:)`
 
-`integer` expects an integer value.
+`integer` expects an integer value. It supports optional `min` and `max` options to check if the user input is within certain bounds.
 
 ```ruby
 module CoerceFoo
   extend Coercive
 
-  attribute :foo, integer, optional
+  attribute :foo,        integer,                  optional
+  attribute :foo_bounds, integer(min: 1, max: 10), optional
 end
 
 CoerceFoo.call("foo" => "1")
@@ -193,6 +194,12 @@ CoerceFoo.call("foo" => "1.5")
 
 CoerceFoo.call("foo" => 1.5)
 # => Coercive::Error: {"foo"=>"float_not_permitted"}
+
+CoerceFoo.call("foo_bounds" => 0)
+# => Coercive::Error: {"foo_bounds"=>"too_low"}
+
+CoerceFoo.call("foo_bounds" => 11)
+# => Coercive::Error: {"foo_bounds"=>"too_high"}
 ```
 
 ### `float`
