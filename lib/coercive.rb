@@ -152,15 +152,20 @@ module Coercive
 
   # Public DSL: Return a coerce function to coerce input to an Integer.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
-  def integer
+  def integer(min: nil, max: nil)
     ->(input) do
       fail Coercive::Error.new("float_not_permitted") if input.is_a?(Float)
 
-      begin
-        Integer(input)
-      rescue TypeError, ArgumentError
-        fail Coercive::Error.new("not_numeric")
-      end
+      input = begin
+                Integer(input)
+              rescue TypeError, ArgumentError
+                fail Coercive::Error.new("not_numeric")
+              end
+
+      fail Coercive::Error.new("too_small") if min && input < min
+      fail Coercive::Error.new("too_large") if max && input > max
+
+      input
     end
   end
 
