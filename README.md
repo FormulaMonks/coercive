@@ -196,10 +196,10 @@ CoerceFoo.call("foo" => 1.5)
 # => Coercive::Error: {"foo"=>"float_not_permitted"}
 
 CoerceFoo.call("foo_bounds" => 0)
-# => Coercive::Error: {"foo_bounds"=>"too_small"}
+# => Coercive::Error: {"foo_bounds"=>"too_low"}
 
 CoerceFoo.call("foo_bounds" => 11)
-# => Coercive::Error: {"foo_bounds"=>"too_large"}
+# => Coercive::Error: {"foo_bounds"=>"too_high"}
 ```
 
 ### `float`

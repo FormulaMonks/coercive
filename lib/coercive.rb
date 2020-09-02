@@ -162,8 +162,8 @@ module Coercive
                 fail Coercive::Error.new("not_numeric")
               end
 
-      fail Coercive::Error.new("too_small") if min && input < min
-      fail Coercive::Error.new("too_large") if max && input > max
+      fail Coercive::Error.new("too_low")  if min && input < min
+      fail Coercive::Error.new("too_high") if max && input > max
 
       input
     end

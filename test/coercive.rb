@@ -134,11 +134,11 @@ describe "Coercive" do
     end
 
     it "errors if the input is out of bounds" do
-      expected_errors = { "baz" => "too_small" }
+      expected_errors = { "baz" => "too_low" }
 
       assert_coercion_error(expected_errors) { @coercion.call("baz" => 0) }
       
-      expected_errors = { "baz" => "too_large" }
+      expected_errors = { "baz" => "too_high" }
 
       assert_coercion_error(expected_errors) { @coercion.call("baz" => 11) }
     end
