@@ -100,6 +100,39 @@ describe "Coercive" do
     end
   end
 
+  describe "integer" do
+    before do
+      @coercion = Module.new do
+        extend Coercive
+
+        attribute :foo, integer, required
+        attribute :bar, integer, optional
+      end
+    end
+
+    it "coerces the input value to an integer" do
+      attributes = { "foo" => "100", "bar" => 100 }
+
+      expected = { "foo" => 100, "bar" => 100 }
+
+      assert_equal expected, @coercion.call(attributes)
+    end
+
+    it "doesn't allow Float" do
+      expected_errors = { "foo" => "float_not_permitted" }
+
+      assert_coercion_error(expected_errors) { @coercion.call("foo" => 100.5) }
+    end
+
+    it "errors if the input can't be coerced into an Integer" do
+      ["nope", "100.5", "1e5"].each do |value|
+        expected_errors = { "foo" => "not_numeric" }
+
+        assert_coercion_error(expected_errors) { @coercion.call("foo" => value) }
+      end
+    end
+  end
+
   describe "float" do
     before do
       @coercion = Module.new do
