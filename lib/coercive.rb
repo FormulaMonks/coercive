@@ -171,13 +171,18 @@ module Coercive
 
   # Public DSL: Return a coerce function to coerce input to a Float.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
-  def float
+  def float(min: nil, max: nil)
     ->(input) do
-      begin
-        Float(input)
-      rescue TypeError, ArgumentError
-        fail Coercive::Error.new("not_numeric")
-      end
+      input = begin
+                Float(input)
+              rescue TypeError, ArgumentError
+                fail Coercive::Error.new("not_numeric")
+              end
+
+      fail Coercive::Error.new("too_low")  if min && input < min
+      fail Coercive::Error.new("too_high") if max && input > max
+
+      input
     end
   end
 

@@ -149,7 +149,8 @@ describe "Coercive" do
       @coercion = Module.new do
         extend Coercive
 
-        attribute :foo, float, required
+        attribute :foo, float,                     optional
+        attribute :bar, float(min: 1.0, max: 5.5), optional
       end
     end
 
@@ -175,6 +176,16 @@ describe "Coercive" do
 
         assert_coercion_error(expected_errors) { @coercion.call("foo" => bad) }
       end
+    end
+
+    it "errors if the input is out of bounds" do
+      expected_errors = { "bar" => "too_low" }
+
+      assert_coercion_error(expected_errors) { @coercion.call("bar" => 0.5) }
+      
+      expected_errors = { "bar" => "too_high" }
+
+      assert_coercion_error(expected_errors) { @coercion.call("bar" => 6.0) }
     end
   end
 
