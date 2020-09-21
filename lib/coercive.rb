@@ -186,6 +186,33 @@ module Coercive
     end
   end
 
+  # Public DSL: Return a coerce function to coerce input to true or false.
+  # Used when declaring an attribute. See documentation for attr_coerce_fns.
+  #
+  # true_if  - coerce function to override which values will coerce to true.
+  # false_if - coerce function to override which values will coerce to false.
+  def boolean(true_if: member([true, "true"]), false_if: member([false, "false"]))
+    ->(input) do
+      test_success = ->(coerce_fn) do
+        begin
+          coerce_fn.call(input)
+        rescue Coercive::Error
+          return false
+        end
+
+        true
+      end
+
+      if test_success.(true_if)
+        true
+      elsif test_success.(false_if)
+        false
+      else
+        fail Coercive::Error.new("not_valid")
+      end
+    end
+  end
+
   # Public DSL: Return a coerce function to coerce input to a String.
   # Used when declaring an attribute. See documentation for attr_coerce_fns.
   #

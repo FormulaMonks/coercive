@@ -225,9 +225,34 @@ CoerceFoo.call("foo_bounds" => 6.5)
 
 CoerceFoo.call("foo" => "0.1")
 # => {"foo"=>0.1}
-  
+
 CoerceFoo.call("foo" => "0.1e5")
 # => {"foo"=>10000.0}
+```
+
+### `boolean(true_if:, false_if:)
+
+`boolean` will coerce input into `true` or `false`. You can also specifiy additional values to coerce into `true` or `false` with the `true_if` and `false_if` options.
+
+```ruby
+module CoerceFoo
+  extend Coercive
+
+  attribute :foo,    boolean,                               optional
+  attribute :foo_if, boolean(true_if: member(["1", "on"])), optional
+end
+
+CoerceFoo.call("foo" => true)
+# => {"foo"=>true}
+
+CoerceFoo.call("foo" => "true")
+# => {"foo"=>true}
+
+CoerceFoo.call("foo" => nil)
+# => Coercive::Error: {"foo"=>"not_valid"}
+
+CoerceFoo.call("foo_if" => "on")
+# => {"foo_if"=>true}
 ```
 
 ### `array`

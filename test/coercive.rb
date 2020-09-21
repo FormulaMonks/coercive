@@ -137,7 +137,7 @@ describe "Coercive" do
       expected_errors = { "baz" => "too_low" }
 
       assert_coercion_error(expected_errors) { @coercion.call("baz" => 0) }
-      
+
       expected_errors = { "baz" => "too_high" }
 
       assert_coercion_error(expected_errors) { @coercion.call("baz" => 11) }
@@ -182,10 +182,68 @@ describe "Coercive" do
       expected_errors = { "bar" => "too_low" }
 
       assert_coercion_error(expected_errors) { @coercion.call("bar" => 0.5) }
-      
+
       expected_errors = { "bar" => "too_high" }
 
       assert_coercion_error(expected_errors) { @coercion.call("bar" => 6.0) }
+    end
+  end
+
+  describe "boolean" do
+    before do
+      @coercion = Module.new do
+        extend Coercive
+
+        attribute :foo,       boolean,                                 optional
+        attribute :foo_true,  boolean(true_if:  member(["on", 1])),    optional
+        attribute :foo_false, boolean(false_if: member(["off", "0"])), optional
+      end
+    end
+
+    it "supports true or false as String by default" do
+      [true, "true"].each do |value|
+        attributes = { "foo" => value }
+
+        expected = { "foo" => true }
+
+        assert_equal expected, @coercion.call(attributes)
+      end
+
+      [false, "false"].each do |value|
+        attributes = { "foo" => value }
+
+        expected = { "foo" => false }
+
+        assert_equal expected, @coercion.call(attributes)
+      end
+    end
+
+    it "supports customizing values to coerce into true or false" do
+      ["on", 1].each do |value|
+        attributes = { "foo_true" => value }
+
+        expected = { "foo_true" => true }
+
+        assert_equal expected, @coercion.call(attributes)
+      end
+
+      ["off", "0"].each do |value|
+        attributes = { "foo_false" => value }
+
+        expected = { "foo_false" => false }
+
+        assert_equal expected, @coercion.call(attributes)
+      end
+    end
+
+    it "fails on unknown values" do
+      ["nope", nil].each do |value|
+        attributes = { "foo" => value }
+
+        expected_errors = { "foo" => "not_valid" }
+        
+        assert_coercion_error(expected_errors) { @coercion.call(attributes) }
+      end
     end
   end
 
