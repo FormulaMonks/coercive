@@ -230,7 +230,7 @@ CoerceFoo.call("foo" => "0.1e5")
 # => {"foo"=>10000.0}
 ```
 
-### `boolean(true_if:, false_if:)
+### `boolean(true_if:, false_if:)`
 
 `boolean` will coerce input into `true` or `false`. You can also specifiy additional values to coerce into `true` or `false` with the `true_if` and `false_if` options.
 
